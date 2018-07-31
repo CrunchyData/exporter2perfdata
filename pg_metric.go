@@ -9,7 +9,15 @@ import (
   "os"
   "strings"
   "strconv"
+  "go/ast"
+  "go/parser"
+  "go/token"
 )
+
+type nvMap map[string]string
+type kvMap map[string]nvMap
+var literalMap map[string]bool
+var metricMap kvMap
 
 const (
   OKY = 0
@@ -25,11 +33,141 @@ const (
   c_NEQ = 3
 )
 
+func populate_map(exp ast.Expr) {
+  switch exp := exp.(type) {
+  case *ast.Ident:
+    literalMap[exp.Name]=false
+  case *ast.ParenExpr:
+    populate_map(exp.X)
+  case *ast.BinaryExpr:
+    populate_map(exp.X)
+    populate_map(exp.Y)
+  case *ast.BasicLit:
+    return;
+ }
+}
+
+func Eval(k string, exp ast.Expr) float64 {
+  switch exp := exp.(type) {
+  case *ast.BinaryExpr:
+    return EvalBinaryExpr(k, exp)
+  case *ast.ParenExpr:
+    return Eval(k, exp.X)
+  case *ast.BasicLit:
+    switch exp.Kind {
+    case token.FLOAT:
+      i, _ := strconv.ParseFloat(exp.Value,64)
+      return i
+    case token.INT:
+      i, _ := strconv.ParseFloat(exp.Value,64)
+      return i
+    }
+  case *ast.Ident:
+    i, _ := strconv.ParseFloat( metricMap[exp.Name][k], 64 )
+    return i
+  }
+  return 0
+}
+
+func EvalBinaryExpr(k string, exp *ast.BinaryExpr) float64 {
+  left := Eval(k, exp.X)
+  right := Eval(k, exp.Y)
+  switch exp.Op {
+  case token.ADD:
+    return left + right
+  case token.SUB:
+    return left - right
+  case token.MUL:
+    return left * right
+  case token.QUO:
+    return left / right
+  default:
+    return 0.0
+  }
+}
+
+func LoadMetric(scanner *bufio.Scanner, actionMap map[string]bool, includeMap nvMap, excludeMap nvMap) {
+  var include_matched, exclude_matched bool
+  for scanner.Scan() {
+    include_matched, exclude_matched = false, false
+    t := scanner.Text()
+    if t[0] == '#' {
+      continue
+    }
+    var at []string
+    var naction string
+    kv := strings.Split(t," ")
+    nmat := strings.Split(kv[0],"{")
+    nm := nmat[0]
+    _, ok := actionMap[nm]
+    if ok {
+      actionMap[nm]=true
+      _, ok := metricMap[nm]
+      if !ok {
+        metricMap[nm] = make(nvMap)
+      }
+      if len(nmat) >1 {
+        at = strings.Split(strings.TrimSuffix(nmat[1],"}"),",")
+        var sep = ""
+        naction=""
+        for i := range at {
+          nstr := strings.Replace(strings.Replace(at[i],"\"","",-1),"=","_",-1)
+          naction = naction + sep + nstr
+          sep = "_"
+          _, ok = includeMap[nstr]
+          if ok {
+            include_matched = true
+          }
+          _, ok = excludeMap[nstr]
+          if ok {
+            exclude_matched = true
+          }
+        }
+      }
+      if len(includeMap) > 0 && include_matched == false {
+        continue
+      }
+      if len(excludeMap) > 0 && exclude_matched == true {
+        continue
+      }
+      metricMap[nm][naction]=kv[1]
+    } else if len(metricMap) > 0 {
+      allDone := true
+      for _, v := range actionMap {
+          if !v {
+            allDone = false
+            break
+          }
+      }
+      if allDone {
+        break
+      }
+    }
+  }
+}
+
+func toIntStr(fkv float64) string {
+  ikv := int64(fkv)
+  return fmt.Sprintf("%d",ikv)
+}
+
 func main() {
   var url, action string
   var compare_type, text_values int
-  var warning, critical, include, exclude string
+  var warning, critical, include, exclude, expression string
   var scanner *bufio.Scanner
+  var naction string
+  //var expr *parser.Parse
+  var msg string = ""
+  var cmsg string = "|"
+  var status int = UNK
+  var cstatus string = ""
+  var fwarning,fcritical, fkv float64
+  //var ikv int64
+  var isExpression bool = false
+  var includeMap, excludeMap nvMap
+  var actionMap map[string]bool
+  actionMap = make(map[string]bool)
 
   flag.StringVar(&url, "url", "", "postgres_exporter url http(s)://<ip | domain><:port>")
   flag.StringVar(&action, "action", "", "postgres_exporter Metric name")
@@ -39,6 +177,7 @@ func main() {
   flag.StringVar(&critical, "critical", "", "Critical threshold")
   flag.StringVar(&include, "include", "", "<domain><value> to include")
   flag.StringVar(&exclude, "exclude", "", "<domain><value> to include")
+  flag.StringVar(&expression, "expression", "", "expression for calculated values")
   flag.Parse()
 
   if url == "" {
@@ -49,6 +188,7 @@ func main() {
     fmt.Println("--action is required")
     os.Exit(UNK)
   }
+  actionMap[action]=false
   if compare_type == c_NEQ && warning == "" && critical == "" {
     fmt.Println("--compare_type NEQ requires --warning and not --critical")
     os.Exit(UNK)
@@ -73,120 +213,89 @@ func main() {
     defer response.Body.Close()
     scanner = bufio.NewScanner(response.Body)
   }
-  var msg string = ""
-  var cmsg string = ""
-  var status int = UNK
-  var cstatus string = ""
-  var fwarning,fcritical, fkv float64
-  var ikv int64
-  var matched bool = false
-  var vinclude, vexclude []string
   if include != "" {
-    vinclude = strings.Split(include, ",")
-  }
-  if exclude != "" {
-    vexclude = strings.Split(exclude, ",")
-  }
-  if compare_type != NOTHING {
-    fwarning, _ = strconv.ParseFloat(warning, 32)
-    fcritical, _ = strconv.ParseFloat(critical, 32)
-  }
-    cmsg = "|"
-  for scanner.Scan() {
-    t := scanner.Text()
-    var include_matched, exclude_matched bool = false, false
-    if t[0] != '#' {
-      var at []string
-      var naction string
-      kv := strings.Split(t," ")
-      nmat := strings.Split(kv[0],"{")
-      nm := nmat[0]
-      if nm == action {
-        matched = true
-        if status == UNK {
-          status = OKY
-        }
-        if kv[1] == "NaN" {
-          kv[1]="-1"
-        }
-        fkv, _ = strconv.ParseFloat(kv[1], 64)
-        ikv = int64(fkv)
-        skv := fmt.Sprintf("%d",ikv)
-        naction = nm
-        if len(nmat) >1 {
-          at = strings.Split(strings.TrimSuffix(nmat[1],"}"),",")
-          var sep = ""
-          naction=""
-          for i := range at {
-            nstr := strings.Replace(strings.Replace(at[i],"\"","",-1),"=","_",-1)
-            naction = naction + sep + nstr
-            sep = "_"
-            if include != "" {
-              for j := range vinclude {
-                if nstr == vinclude[j] {
-                  include_matched = true
-                }
-              }
-            }
-            if exclude != "" {
-              for j := range vexclude {
-                if nstr == vexclude[j] {
-                  exclude_matched = true
-                }
-              }
-            }
-          }
-        }
-        if include != "" && include_matched == false {
-          //fmt.Println("CONTINUE on Including.........")
-          continue
-        }
-        if exclude != "" && exclude_matched == true {
-          //fmt.Println("CONTINUE on Excluding.........")
-          continue
-        }
-        switch compare_type {
-          case c_GT:
-            if fkv > fcritical {
-              status = ERR
-            } else if fkv > fwarning {
-              if status == OKY {
-                status = WRN
-              }
-            }
-          case c_LT:
-            if fkv < fcritical {
-              status = ERR
-            } else if fkv < fwarning {
-              if status == OKY {
-                status = WRN
-              }
-            }
-          case c_NEQ:
-            if critical != "" && kv[1] != critical {
-              status = ERR
-            } else if warning != "" && kv[1] != warning {
-              if status == OKY {
-                status = WRN
-              }
-            }
-        }
-        if text_values == 1 {
-          msg = msg + naction +": "+ kv[1] + " "
-          cmsg = cmsg + " "+ naction + "=" +  kv[1]
-        } else {
-          msg = msg + naction +": "+ skv + " "
-          cmsg = cmsg + " "+ naction + "=" +  skv
-        }
-        if compare_type > NOTHING && compare_type < c_NEQ {
-          cmsg = cmsg + ";" + warning + ";" + critical
-        }
-      } else if matched == true {
-        break
-      }
+    includeMap = make(nvMap)
+    for _, k := range strings.Split(include, ",") {
+      includeMap[k]=""
     }
   }
+  if exclude != "" {
+    excludeMap = make(nvMap)
+    for _,k := range strings.Split(exclude, ",") {
+      excludeMap[k]=""
+    }
+  }
+  if compare_type != NOTHING {
+    //fwarning, _ = strconv.ParseFloat(warning, 32)
+    //fcritical, _ = strconv.ParseFloat(critical, 32)
+  }
 
+  exp, err := parser.ParseExpr(expression)
+  if err == nil {
+    literalMap = make(map[string]bool)
+    populate_map(exp)
+  }
+
+  metricMap = make(kvMap)
+  if len(literalMap) > 0 {
+    isExpression=true
+    LoadMetric(scanner, literalMap, includeMap, excludeMap)
+  } else {
+    LoadMetric(scanner, actionMap, includeMap, excludeMap)
+  }
+  for _, v := range metricMap {
+    if status == UNK {
+      status = OKY
+    }
+    for key, value := range v {
+      if isExpression {
+        fkv = Eval(key,exp)
+
+      } else {
+        fkv, _ = strconv.ParseFloat(value,64)
+      }
+      switch compare_type {
+        case c_GT:
+          if fkv > fcritical {
+            status = ERR
+          } else if fkv > fwarning {
+            if status == OKY {
+              status = WRN
+            }
+          }
+        case c_LT:
+          if fkv < fcritical {
+            status = ERR
+          } else if fkv < fwarning {
+            if status == OKY {
+              status = WRN
+            }
+          }
+        case c_NEQ:
+          if critical != "" && value != critical {
+            status = ERR
+          } else if warning != "" && value != warning {
+            if status == OKY {
+              status = WRN
+            }
+          }
+      }
+      if len(key) > 0 {
+        naction = key
+      } else {
+        naction = action
+      }
+      if text_values == 1 {
+        msg = msg + naction +": "+ value + " "
+        cmsg = cmsg + " "+ naction + "=" + value
+      } else {
+        skv := toIntStr(fkv)
+        msg = msg + naction +": "+ skv + " "
+        cmsg = cmsg + " "+ naction + "=" +  skv
+      }
+    }
+    break
+  }
   switch status {
     case OKY:
       cstatus = "OK:"
@@ -197,7 +306,6 @@ func main() {
     case UNK:
       cstatus = "UNKNOWN:"
   }
-
   fmt.Println(action,cstatus,msg,cmsg)
   os.Exit(status)
 }
