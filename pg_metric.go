@@ -15,6 +15,8 @@ import (
   "go/token"
 )
 
+const PGMetricVersion = "2.0"
+
 type nvMap map[string]string
 type kvMap map[string]nvMap
 var literalMap map[string]bool
@@ -193,27 +195,38 @@ func main() {
   flag.StringVar(&include, "include", "", "<domain><value> to include")
   flag.StringVar(&exclude, "exclude", "", "<domain><value> to include")
   flag.StringVar(&expression, "expression", "", "expression for calculated values")
+  version := flag.Bool("version", false, "Print version")
   flag.Parse()
 
+  if *version {
+    fmt.Println(PGMetricVersion)
+    os.Exit(0)
+  }
+
   if url == "" {
+    fmt.Println("pg_metric:",PGMetricVersion)
     fmt.Println("--url is required")
     os.Exit(UNK)
   }
   if action == "" {
+    fmt.Println("pg_metric:",PGMetricVersion)
     fmt.Println("--action is required")
     os.Exit(UNK)
   }
   actionMap[action]=false
   if compare_type == c_NEQ && warning == "" && critical == "" {
+    fmt.Println("pg_metric:",PGMetricVersion)
     fmt.Println("--compare_type NEQ requires --warning and not --critical")
     os.Exit(UNK)
   } else if (compare_type > NOTHING && compare_type < c_NEQ && (warning == "" || critical == "")) {
+    fmt.Println("pg_metric:",PGMetricVersion)
     fmt.Println("--compare_type requires --warning and --critical")
     os.Exit(UNK)
   }
   if strings.HasPrefix(url, "file") {
     inFile, err := os.Open(strings.TrimPrefix(url, "file://"))
     if err != nil {
+      fmt.Println("pg_metric:",PGMetricVersion)
       log.Print(err)
       os.Exit(UNK)
     }
@@ -222,6 +235,7 @@ func main() {
   }  else {
     response, err := http.Get(url)
     if err != nil {
+      fmt.Println("pg_metric:",PGMetricVersion)
       log.Print(err)
       os.Exit(UNK)
     }
