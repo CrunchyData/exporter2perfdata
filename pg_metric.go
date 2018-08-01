@@ -130,7 +130,11 @@ func LoadMetric(scanner *bufio.Scanner, actionMap map[string]bool, includeMap nv
       if len(excludeMap) > 0 && exclude_matched == true {
         continue
       }
-      metricMap[nm][naction]=kv[1]
+      if kv[1] == "NaN" {
+        metricMap[nm][naction]="-1"
+      } else {
+        metricMap[nm][naction]=kv[1]
+      }
     } else if len(metricMap) > 0 {
       allDone := true
       for _, v := range actionMap {
@@ -157,13 +161,11 @@ func main() {
   var warning, critical, include, exclude, expression string
   var scanner *bufio.Scanner
   var naction string
-  //var expr *parser.Parse
   var msg string = ""
   var cmsg string = "|"
   var status int = UNK
   var cstatus string = ""
   var fwarning,fcritical, fkv float64
-  //var ikv int64
   var isExpression bool = false
   var includeMap, excludeMap nvMap
   var actionMap map[string]bool
@@ -226,8 +228,8 @@ func main() {
     }
   }
   if compare_type != NOTHING {
-    //fwarning, _ = strconv.ParseFloat(warning, 32)
-    //fcritical, _ = strconv.ParseFloat(critical, 32)
+    fwarning, _ = strconv.ParseFloat(warning, 32)
+    fcritical, _ = strconv.ParseFloat(critical, 32)
   }
 
   exp, err := parser.ParseExpr(expression)
@@ -250,7 +252,6 @@ func main() {
     for key, value := range v {
       if isExpression {
         fkv = Eval(key,exp)
-
       } else {
         fkv, _ = strconv.ParseFloat(value,64)
       }

@@ -4,29 +4,20 @@ GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
-BINARY_UNIX=$(BINARY_NAME)_unix
     
 BINARY_NAME=pg_metric
+TEST_NAME=pg_metric-test.sh
 
 all: build
 
 build: 
 	$(GOBUILD) -o $(BINARY_NAME) -v
 
-test: 
-	$(GOTEST) -v ./...
-
 clean: 
 	$(GOCLEAN)
 	rm -f $(BINARY_NAME)
-	rm -f $(BINARY_UNIX)
 
-run:
-	./$(BINARY_NAME)
+test:
+	./$(TEST_NAME) NODE 1 NODE_1_REPORT.txt
+	./$(TEST_NAME) PG   1 PG_1_REPORT.txt
 
-deps:
-	echo "Nothing to do..."
-
-# Cross compilation
-build-linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINARY_UNIX) -v
