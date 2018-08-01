@@ -1,37 +1,22 @@
 #!/bin/bash
 TESTTYPE=$1
 TESTNUM=$2
-REPORT_FILE=$3
-TEMP_FILE=$(basename $REPORT_FILE .txt).tmp
+CONF_FILE=${TESTTYPE}.conf
+DATA_FILE=${TESTTYPE}_${TESTNUM}_REPORT.dat
+RESULT_FILE=${TESTTYPE}_${TESTNUM}_REPORT.result
+TEMP_FILE=${TESTTYPE}_${TESTNUM}_REPORT.tmp
+DBG_FILE=debug.tmp
+CMD_FILE=cmd.sh
+
 EX=0
 
-if [ $TESTTYPE = "NODE" ]; then
-  case  $TESTNUM in
-    1)
-      python convert-icinga2-pg_metric.py node-services.conf ob1papropgs03_primary_node.txt >cmd.sh
-      ;;
-    *)
-      exit 2
-      ;;
-  esac
-fi
+python convert-icinga2-pg_metric.py ${CONF_FILE} ${DATA_FILE} 2>${CMD_FILE} >${DBG_FILE}
 
-if [ $TESTTYPE = "PG" ]; then
-  case  $TESTNUM in
-    1)
-      python convert-icinga2-pg_metric.py postgresql-services.conf ob1papropgs03_primary_pg.txt >cmd.sh
-      ;;
-    *)
-      exit 2
-      ;;
-  esac
-fi
-
-bash cmd.sh >$TEMP_FILE
-diff -Nau $REPORT_FILE $TEMP_FILE &>/dev/null
+bash ${CMD_FILE} >${TEMP_FILE}
+diff -Nau ${RESULT_FILE} ${TEMP_FILE} &>>${DBG_FILE}
 EX=$?
 if [ $EX -eq 0 ]; then
-  echo "Test Passed"
+  echo "Test Passed ($(cat ${CMD_FILE} | wc -l))"
 else
   echo "Test Failed"
 fi

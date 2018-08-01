@@ -1,0 +1,27 @@
+ccp_connection_stats_active OK: ccp_connection_stats_active: 2  | ccp_connection_stats_active=2
+ccp_connection_stats_idle OK: ccp_connection_stats_idle: 16  | ccp_connection_stats_idle=16
+ccp_connection_stats_idle_in_txn OK: ccp_connection_stats_idle_in_txn: 0  | ccp_connection_stats_idle_in_txn=0
+ccp_connection_stats_max_idle_in_txn_time OK: ccp_connection_stats_max_idle_in_txn_time: 0  | ccp_connection_stats_max_idle_in_txn_time=0;1800;3600
+ccp_connection_stats_max_query_time OK: ccp_connection_stats_max_query_time: 30  | ccp_connection_stats_max_query_time=30;43200;86400
+ccp_connection_stats_max_connections OK: ccp_connection_stats_max_connections: 400  | ccp_connection_stats_max_connections=400
+ccp_stat_database_blks_hit OK: dbname_edw: 7796530819972 dbname_edw_ods: 30238132640 dbname_postgres: 53090413  | dbname_edw=7796530819972 dbname_edw_ods=30238132640 dbname_postgres=53090413
+ccp_stat_database_blks_read OK: dbname_edw: 559784186999 dbname_edw_ods: 58890609033 dbname_postgres: 742371  | dbname_edw=559784186999 dbname_edw_ods=58890609033 dbname_postgres=742371
+ccp_database_size_bytes OK: dbname_edw: 2985214230700 dbname_edw_ods: 2588578726060 dbname_postgres: 7553196  | dbname_edw=2985214230700 dbname_edw_ods=2588578726060 dbname_postgres=7553196
+ccp_stat_bgwriter_buffers_alloc OK: ccp_stat_bgwriter_buffers_alloc: 74362610510  | ccp_stat_bgwriter_buffers_alloc=74362610510
+ccp_stat_bgwriter_buffers_backend OK: ccp_stat_bgwriter_buffers_backend: 5014716941  | ccp_stat_bgwriter_buffers_backend=5014716941
+ccp_stat_bgwriter_buffers_backend_fsync OK: ccp_stat_bgwriter_buffers_backend_fsync: 0  | ccp_stat_bgwriter_buffers_backend_fsync=0
+ccp_stat_bgwriter_buffers_checkpoint OK: ccp_stat_bgwriter_buffers_checkpoint: 969563558  | ccp_stat_bgwriter_buffers_checkpoint=969563558
+ccp_stat_bgwriter_buffers_clean OK: ccp_stat_bgwriter_buffers_clean: 814567433  | ccp_stat_bgwriter_buffers_clean=814567433
+ccp_stat_database_deadlocks OK: dbname_edw: 0 dbname_edw_ods: 0 dbname_postgres: 0  | dbname_edw=0 dbname_edw_ods=0 dbname_postgres=0
+ccp_stat_database_xact_commit OK: dbname_edw: 45132836 dbname_edw_ods: 8530862 dbname_postgres: 13504073  | dbname_edw=45132836 dbname_edw_ods=8530862 dbname_postgres=13504073
+ccp_stat_database_xact_rollback OK: dbname_edw: 7530 dbname_edw_ods: 229 dbname_postgres: 58  | dbname_edw=7530 dbname_edw_ods=229 dbname_postgres=58
+ccp_transaction_wraparound_percent_towards_emergency_autovac OK: ccp_transaction_wraparound_percent_towards_emergency_autovac: 46  | ccp_transaction_wraparound_percent_towards_emergency_autovac=46;75;90
+ccp_transaction_wraparound_percent_towards_wraparound OK: ccp_transaction_wraparound_percent_towards_wraparound: 5  | ccp_transaction_wraparound_percent_towards_wraparound=5;50;70
+ccp_replication_lag_size_bytes OK: replica_10.70.33.202/32_replica_hostname__replica_port_59402: 0  | replica_10.70.33.202/32_replica_hostname__replica_port_59402=0;33554432;67108864
+ccp_replication_lag_replay_time OK: ccp_replication_lag_replay_time: -1  | ccp_replication_lag_replay_time=-1;1800;3600
+ccp_stat_database_conflicts OK: dbname_edw: 0 dbname_edw_ods: 0 dbname_postgres: 0  | dbname_edw=0 dbname_edw_ods=0 dbname_postgres=0
+ccp_stat_database_tup_deleted OK: dbname_edw: 6048152758 dbname_edw_ods: 2812125755 dbname_postgres: 35  | dbname_edw=6048152758 dbname_edw_ods=2812125755 dbname_postgres=35
+ccp_stat_database_tup_fetched OK: dbname_edw: 12043450583249 dbname_edw_ods: 10988152327 dbname_postgres: 10270237  | dbname_edw=12043450583249 dbname_edw_ods=10988152327 dbname_postgres=10270237
+ccp_stat_database_tup_inserted OK: dbname_edw: 18478026225 dbname_edw_ods: 7148716533 dbname_postgres: 67  | dbname_edw=18478026225 dbname_edw_ods=7148716533 dbname_postgres=67
+ccp_stat_database_tup_returned OK: dbname_edw: 54680001149604 dbname_edw_ods: 275964267804 dbname_postgres: 588701309  | dbname_edw=54680001149604 dbname_edw_ods=275964267804 dbname_postgres=588701309
+ccp_stat_database_tup_updated OK: dbname_edw: 8569649491 dbname_edw_ods: 105271067 dbname_postgres: 2961  | dbname_edw=8569649491 dbname_edw_ods=105271067 dbname_postgres=2961

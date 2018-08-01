@@ -2,6 +2,7 @@ package main
 
 import (
   "bufio"
+  "sort"
   "flag"
   "fmt"
   "log"
@@ -150,13 +151,24 @@ func LoadMetric(scanner *bufio.Scanner, actionMap map[string]bool, includeMap nv
   }
 }
 
+func sortedMapKeys(m map[string]string) ([]string) {
+        keys := make([]string, len(m))
+        i := 0
+        for k := range m {
+            keys[i] = k
+            i++
+        }
+        sort.Strings(keys)
+        return keys
+}
+
 func toIntStr(fkv float64) string {
   ikv := int64(fkv)
   return fmt.Sprintf("%d",ikv)
 }
 
 func main() {
-  var url, action string
+  var url, action, value string
   var compare_type, text_values int
   var warning, critical, include, exclude, expression string
   var scanner *bufio.Scanner
@@ -169,6 +181,7 @@ func main() {
   var isExpression bool = false
   var includeMap, excludeMap nvMap
   var actionMap map[string]bool
+  var keys []string
   actionMap = make(map[string]bool)
 
   flag.StringVar(&url, "url", "", "postgres_exporter url http(s)://<ip | domain><:port>")
@@ -249,7 +262,9 @@ func main() {
     if status == UNK {
       status = OKY
     }
-    for key, value := range v {
+    keys = sortedMapKeys(v)
+    for _, key := range keys {
+      value = v[key]
       if isExpression {
         fkv = Eval(key,exp)
       } else {
@@ -293,6 +308,9 @@ func main() {
         skv := toIntStr(fkv)
         msg = msg + naction +": "+ skv + " "
         cmsg = cmsg + " "+ naction + "=" +  skv
+      }
+      if compare_type > NOTHING && compare_type < c_NEQ {
+        cmsg = cmsg + ";" + warning + ";" + critical
       }
     }
     break

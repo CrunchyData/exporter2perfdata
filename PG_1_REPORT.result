@@ -1,0 +1,27 @@
+ccp_connection_stats_active OK: ccp_connection_stats_active: 2  | ccp_connection_stats_active=2
+ccp_connection_stats_idle OK: ccp_connection_stats_idle: 15  | ccp_connection_stats_idle=15
+ccp_connection_stats_idle_in_txn OK: ccp_connection_stats_idle_in_txn: 0  | ccp_connection_stats_idle_in_txn=0
+ccp_connection_stats_max_idle_in_txn_time OK: ccp_connection_stats_max_idle_in_txn_time: 0  | ccp_connection_stats_max_idle_in_txn_time=0;1800;3600
+ccp_connection_stats_max_query_time OK: ccp_connection_stats_max_query_time: 0  | ccp_connection_stats_max_query_time=0;43200;86400
+ccp_connection_stats_max_connections OK: ccp_connection_stats_max_connections: 100  | ccp_connection_stats_max_connections=100
+ccp_stat_database_blks_hit OK: dbname_RQA: 22316377930 dbname_postgres: 13032320  | dbname_RQA=22316377930 dbname_postgres=13032320
+ccp_stat_database_blks_read OK: dbname_RQA: 2551084982 dbname_postgres: 35434  | dbname_RQA=2551084982 dbname_postgres=35434
+ccp_database_size_bytes OK: dbname_RQA: 1659495383212 dbname_postgres: 7430316  | dbname_RQA=1659495383212 dbname_postgres=7430316
+ccp_stat_bgwriter_buffers_alloc OK: ccp_stat_bgwriter_buffers_alloc: 290553599  | ccp_stat_bgwriter_buffers_alloc=290553599
+ccp_stat_bgwriter_buffers_backend OK: ccp_stat_bgwriter_buffers_backend: 478412911  | ccp_stat_bgwriter_buffers_backend=478412911
+ccp_stat_bgwriter_buffers_backend_fsync OK: ccp_stat_bgwriter_buffers_backend_fsync: 0  | ccp_stat_bgwriter_buffers_backend_fsync=0
+ccp_stat_bgwriter_buffers_checkpoint OK: ccp_stat_bgwriter_buffers_checkpoint: 80932663  | ccp_stat_bgwriter_buffers_checkpoint=80932663
+ccp_stat_bgwriter_buffers_clean OK: ccp_stat_bgwriter_buffers_clean: 23687505  | ccp_stat_bgwriter_buffers_clean=23687505
+ccp_stat_database_deadlocks OK: dbname_RQA: 0 dbname_postgres: 0  | dbname_RQA=0 dbname_postgres=0
+ccp_stat_database_xact_commit OK: dbname_RQA: 1587419441 dbname_postgres: 2540205  | dbname_RQA=1587419441 dbname_postgres=2540205
+ccp_stat_database_xact_rollback OK: dbname_RQA: 8265 dbname_postgres: 10  | dbname_RQA=8265 dbname_postgres=10
+ccp_transaction_wraparound_percent_towards_emergency_autovac OK: ccp_transaction_wraparound_percent_towards_emergency_autovac: 25  | ccp_transaction_wraparound_percent_towards_emergency_autovac=25;75;90
+ccp_transaction_wraparound_percent_towards_wraparound OK: ccp_transaction_wraparound_percent_towards_wraparound: 13  | ccp_transaction_wraparound_percent_towards_wraparound=13;50;70
+ccp_replication_lag_size_bytes OK: replica_10.25.32.77/32_replica_hostname__replica_port_41636: 320  | replica_10.25.32.77/32_replica_hostname__replica_port_41636=320;33554432;67108864
+ccp_replication_lag_replay_time OK: ccp_replication_lag_replay_time: -1  | ccp_replication_lag_replay_time=-1;1800;3600
+ccp_stat_database_conflicts OK: dbname_RQA: 0 dbname_postgres: 0  | dbname_RQA=0 dbname_postgres=0
+ccp_stat_database_tup_deleted OK: dbname_RQA: 1155956207 dbname_postgres: 0  | dbname_RQA=1155956207 dbname_postgres=0
+ccp_stat_database_tup_fetched OK: dbname_RQA: 36662933037 dbname_postgres: 3326209  | dbname_RQA=36662933037 dbname_postgres=3326209
+ccp_stat_database_tup_inserted OK: dbname_RQA: 684167556 dbname_postgres: 0  | dbname_RQA=684167556 dbname_postgres=0
+ccp_stat_database_tup_returned OK: dbname_RQA: 68970239456 dbname_postgres: 105186439  | dbname_RQA=68970239456 dbname_postgres=105186439
+ccp_stat_database_tup_updated OK: dbname_RQA: 235 dbname_postgres: 0  | dbname_RQA=235 dbname_postgres=0

@@ -18,6 +18,7 @@ clean:
 	rm -f $(BINARY_NAME)
 
 test:
-	./$(TEST_NAME) NODE 1 NODE_1_REPORT.txt
-	./$(TEST_NAME) PG   1 PG_1_REPORT.txt
-
+	./$(TEST_NAME) NODE 1 NODE_1_REPORT.out
+	./$(TEST_NAME) PG   1 PG_1_REPORT.out
+	./$(TEST_NAME) NODE 2 NODE_2_REPORT.out
+	./$(TEST_NAME) PG   2 PG_2_REPORT.out
