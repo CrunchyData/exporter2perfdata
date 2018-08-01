@@ -18,7 +18,12 @@ clean:
 	rm -f $(BINARY_NAME)
 
 test:
-	./$(TEST_NAME) NODE 1 NODE_1_REPORT.out
-	./$(TEST_NAME) PG   1 PG_1_REPORT.out
-	./$(TEST_NAME) NODE 2 NODE_2_REPORT.out
-	./$(TEST_NAME) PG   2 PG_2_REPORT.out
+	./$(TEST_NAME) NODE 1
+	./$(TEST_NAME) PG   1
+	./$(TEST_NAME) NODE 2
+	./$(TEST_NAME) PG   2
+
+testclean:
+	rm -f NODE_[0-9]*_REPORT.tmp
+	rm -f PG_[0-9]*_REPORT.tmp
+	rm cmd.sh debug.tmp
