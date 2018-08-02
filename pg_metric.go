@@ -184,6 +184,13 @@ func main() {
   var includeMap, excludeMap nvMap
   var actionMap map[string]bool
   var keys []string
+  flag.Usage = func() {
+    fmt.Println("pg_metric:",PGMetricVersion)
+    fmt.Println("\nUsage of pg_metric:")
+    flag.PrintDefaults()
+    fmt.Println("")
+  }
+
   actionMap = make(map[string]bool)
 
   flag.StringVar(&url, "url", "", "postgres_exporter url http(s)://<ip | domain><:port>")
@@ -200,47 +207,51 @@ func main() {
 
   if *version {
     fmt.Println(PGMetricVersion)
-    os.Exit(0)
+    os.Exit(OKY)
   }
 
   if url == "" {
-    fmt.Println("pg_metric:",PGMetricVersion)
-    fmt.Println("--url is required")
+    (flag.Usage)()
+    fmt.Println("ERROR:\n--url is required")
     os.Exit(UNK)
   }
   if action == "" {
-    fmt.Println("pg_metric:",PGMetricVersion)
-    fmt.Println("--action is required")
+    (flag.Usage)()
+    fmt.Println("ERROR:\n--action is required")
     os.Exit(UNK)
   }
   actionMap[action]=false
   if compare_type == c_NEQ && warning == "" && critical == "" {
-    fmt.Println("pg_metric:",PGMetricVersion)
-    fmt.Println("--compare_type NEQ requires --warning and not --critical")
+    (flag.Usage)()
+    fmt.Println("ERROR:\n--compare_type NEQ requires --warning and not --critical")
     os.Exit(UNK)
   } else if (compare_type > NOTHING && compare_type < c_NEQ && (warning == "" || critical == "")) {
-    fmt.Println("pg_metric:",PGMetricVersion)
-    fmt.Println("--compare_type requires --warning and --critical")
+    (flag.Usage)()
+    fmt.Println("ERROR:\n--compare_type requires --warning and --critical")
     os.Exit(UNK)
   }
-  if strings.HasPrefix(url, "file") {
+  if strings.HasPrefix(url, "file://") {
     inFile, err := os.Open(strings.TrimPrefix(url, "file://"))
     if err != nil {
-      fmt.Println("pg_metric:",PGMetricVersion)
+      fmt.Println("ERROR:\n")
       log.Print(err)
       os.Exit(UNK)
     }
     defer inFile.Close()
     scanner = bufio.NewScanner(inFile)
-  }  else {
+  }  else if strings.HasPrefix(url, "https://") || strings.HasPrefix(url, "http://") {
     response, err := http.Get(url)
     if err != nil {
-      fmt.Println("pg_metric:",PGMetricVersion)
+      fmt.Println("ERROR:\n")
       log.Print(err)
       os.Exit(UNK)
     }
     defer response.Body.Close()
     scanner = bufio.NewScanner(response.Body)
+  } else {
+    (flag.Usage)()
+    fmt.Println("ERROR:\n--url is invalid")
+    os.Exit(UNK)
   }
   if include != "" {
     includeMap = make(nvMap)
