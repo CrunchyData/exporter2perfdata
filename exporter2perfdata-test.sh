@@ -10,7 +10,7 @@ CMD_FILE=cmd.sh
 
 EX=0
 
-python convert-icinga2-pg_metric.py ${CONF_FILE} ${DATA_FILE} 2>${CMD_FILE} >${DBG_FILE}
+python convert-exporter2perfdata.py ${CONF_FILE} ${DATA_FILE} 2>${CMD_FILE} >${DBG_FILE}
 
 bash ${CMD_FILE} >${TEMP_FILE}
 diff -Nau ${RESULT_FILE} ${TEMP_FILE} &>>${DBG_FILE}
@@ -21,3 +21,4 @@ else
   echo "Test Failed"
 fi
 exit $EX
+

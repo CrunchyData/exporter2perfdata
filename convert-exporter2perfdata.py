@@ -33,15 +33,15 @@ with open(sys.argv[1], 'r') as f:
             host[name]=OrderedDict()
         elif "{" in line:
             add_attributes += 1
-    print host
-    for k, v in host.iteritems():
+    print( host )
+    for k, v in host.items():
         cmd=''
-        for k1, v1 in v.iteritems():
-            print 1, k1, v1
+        for k1, v1 in v.items():
+            print( 1, k1, v1 )
             if k1 == 'vars.pg_action':
                 cmd+=' --action=%s' % v1
             elif k1 == 'vars.pg_compare':
-                cmd+=' --compare_type=' + v1
+                cmd+=' --compare-type=' + v1
             elif k1 == 'vars.pg_critical':
                 cmd+=' --critical=' + v1
             elif k1 == 'vars.pg_warning':
@@ -53,5 +53,6 @@ with open(sys.argv[1], 'r') as f:
             elif k1 == 'vars.pg_expression':
                 cmd+=' --expression=%s' % v1
             elif k1 == 'vars.pg_text':
-                cmd+=' --text_values=' + v1
-        print >> sys.stderr, './pg_metric --url=file://%s' % sys.argv[2], cmd
+                cmd+=' --text-values=' + v1
+        print('./exporter2perfdata --url=file://%s' % sys.argv[2], cmd, file=sys.stderr )
+

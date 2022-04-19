@@ -1,3 +1,9 @@
+/*
+*
+* Copyright © 2018-2022 Crunchy Data Solutions, Inc. All Rights Reserved.
+*
+*/
+
 package main
 
 import (
@@ -185,24 +191,26 @@ func main() {
   var actionMap map[string]bool
   var keys []string
   flag.Usage = func() {
-    fmt.Println("pg_metric:",PGMetricVersion)
-    fmt.Println("\nUsage of pg_metric:")
+    fmt.Println("exporter2perfdata:",PGMetricVersion)
+    fmt.Println("\nUsage of exporter2perfdata:")
     flag.PrintDefaults()
     fmt.Println("")
   }
 
   actionMap = make(map[string]bool)
 
-  flag.StringVar(&url, "url", "", "postgres_exporter url http(s)://<ip | domain><:port>")
-  flag.StringVar(&action, "action", "", "postgres_exporter Metric name")
-  flag.IntVar(&text_values, "text_values",  0, "Treat values as TEXT")
-  flag.IntVar(&compare_type, "compare_type",  0, "Compare Type 0=None,1=GT,2=LT,3=NEQ")
+  flag.StringVar(&url, "url", "", "exporter url http(s)://<ip | domain><:port> [REQUIRED]")
+  flag.StringVar(&action, "action", "", "exporter Metric name [REQUIRED]")
+  flag.IntVar(&text_values, "text-values",  0, "Treat values as TEXT")
+  flag.IntVar(&compare_type, "compare-type",  0, "Compare Type 0=None,1=GT,2=LT,3=NEQ")
   flag.StringVar(&warning, "warning",  "", "Warning threshold")
   flag.StringVar(&critical, "critical", "", "Critical threshold")
   flag.StringVar(&include, "include", "", "<domain><value> to include")
   flag.StringVar(&exclude, "exclude", "", "<domain><value> to include")
   flag.StringVar(&expression, "expression", "", "expression for calculated values")
+  force_ok := flag.Bool("force-ok", false, "Force UNKNOWN to return OK status")
   version := flag.Bool("version", false, "Print version")
+
   flag.Parse()
 
   if *version {
@@ -223,11 +231,11 @@ func main() {
   actionMap[action]=false
   if compare_type == c_NEQ && warning == "" && critical == "" {
     (flag.Usage)()
-    fmt.Println("ERROR:\n--compare_type NEQ requires --warning and not --critical")
+    fmt.Println("ERROR:\n--compare-type NEQ requires --warning and not --critical")
     os.Exit(UNK)
-  } else if (compare_type > NOTHING && compare_type < c_NEQ && (warning == "" || critical == "")) {
+  } else if (compare_type > NOTHING && compare_type < c_NEQ && (critical == ""  && warning == "")) {
     (flag.Usage)()
-    fmt.Println("ERROR:\n--compare_type requires --warning and --critical")
+    fmt.Println("ERROR:\n--compare-type requires --warning or --critical")
     os.Exit(UNK)
   }
   if strings.HasPrefix(url, "file://") {
@@ -297,17 +305,17 @@ func main() {
       }
       switch compare_type {
         case c_GT:
-          if fkv > fcritical {
+          if critical != "" && fkv > fcritical {
             status = ERR
-          } else if fkv > fwarning {
+          } else if warning != "" && fkv > fwarning {
             if status == OKY {
               status = WRN
             }
           }
         case c_LT:
-          if fkv < fcritical {
+          if critical != "" && fkv < fcritical {
             status = ERR
-          } else if fkv < fwarning {
+          } else if warning != "" && fkv < fwarning {
             if status == OKY {
               status = WRN
             }
@@ -349,6 +357,10 @@ func main() {
       cstatus = "CRITICAL:"
     case UNK:
       cstatus = "UNKNOWN:"
+      if *force_ok {
+        status = OKY
+        msg = "force_ok"
+      }
   }
   fmt.Println(action,cstatus,msg,cmsg)
   os.Exit(status)

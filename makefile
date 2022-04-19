@@ -5,13 +5,13 @@ GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
     
-BINARY_NAME=pg_metric
-TEST_NAME=pg_metric-test.sh
+BINARY_NAME=exporter2perfdata
+TEST_NAME=exporter2perfdata-test.sh
 
 all: build
 
 build: 
-	$(GOBUILD) -o $(BINARY_NAME) -v
+	CGO_ENABLED=0 $(GOBUILD) -o $(BINARY_NAME) -v
 
 clean: 
 	$(GOCLEAN)
