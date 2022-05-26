@@ -6,7 +6,7 @@ GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
     
 BINARY_NAME=exporter2perfdata
-TEST_NAME=exporter2perfdata-test.sh
+TEST_NAME=testing/exporter2perfdata-test.sh
 
 all: build
 
@@ -24,6 +24,7 @@ test:
 	./$(TEST_NAME) PG   2
 
 testclean:
-	rm -f NODE_[0-9]*_REPORT.tmp
-	rm -f PG_[0-9]*_REPORT.tmp
-	rm cmd.sh debug.tmp
+	rm -f testing/NODE_[0-9]*_REPORT.tmp
+	rm -f testing/PG_[0-9]*_REPORT.tmp
+	rm testing/cmd.sh testing/debug.tmp
+
